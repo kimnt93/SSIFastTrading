@@ -6,13 +6,12 @@ from typing import Union, Dict, List
 
 from langchain_community.chains.llm_requests import DEFAULT_HEADERS
 
-from ssi_trading.config import TradingServiceConfig
+from ssi_trading.config import TradingServiceConfig, PAPER_BASE_URL
 from ssi_trading.models.trading import (
     CreatedOrder, MaxBuySellQty, StockPosition,
     AccountBalance,
 )
 from ssi_trading.services.client import BaseTradingService
-from ssi_trading.services.paper import PAPER_BASE_URL
 
 
 class PaperFutureTradingService(BaseTradingService):

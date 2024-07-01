@@ -8,7 +8,7 @@ from ssi_fc_data.fc_md_client import MarketDataClient
 from ssi_fc_data.fc_md_stream import MarketDataStream
 from ssi_fctrading import FCTradingClient, FCTradingStream
 
-from vn_trading.config import StreamServiceConfig, TradingServiceConfig
+from ssi_trading.config import TradingServiceConfig, DataServiceConfig
 
 data_logger = logging.getLogger("data")
 data_logger.setLevel(logging.DEBUG)
@@ -72,7 +72,7 @@ class BaseTradingStream(Generic[T]):
 
 
 class BaseDataStream(Generic[T]):
-    def __init__(self, config: StreamServiceConfig, names: List[str], channel_name: str):
+    def __init__(self, config: DataServiceConfig, names: List[str], channel_name: str):
         """
         :param config: DataServiceConfig instance
         :param names: VN30, VN30F2407, HPG, etc.

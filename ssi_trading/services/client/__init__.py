@@ -2,10 +2,10 @@ from abc import ABC, abstractmethod
 from typing import Union, List, Dict
 
 from ssi_fctrading import FCTradingClient
-from vn_trading.config import TradingServiceConfig, DataServiceConfig
-from vn_trading.models.data import StockPrice, DailyIndex, OHLCV
-from vn_trading.models.definitions import OrderStatus, SecurityMarket
-from vn_trading.models.trading import (
+from ssi_trading.config import TradingServiceConfig, DataServiceConfig
+from ssi_trading.models.data import StockPrice, DailyIndex, OHLCV
+from ssi_trading.models.definitions import OrderStatus, SecurityMarket
+from ssi_trading.models.trading import (
     CreatedOrder, AccountBalance, StockPosition, MaxBuySellQty,
 )
 import requests

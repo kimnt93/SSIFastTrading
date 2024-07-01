@@ -18,8 +18,8 @@ if __name__ == "__main__":
     list_indexes = ["VN30"]
 
     data_config = DataServiceConfig(
-        consumer_id=os.environ['CONSUMER_ID'],
-        consumer_secret=os.environ['CONSUMER_SECRET'],
+        consumer_id=os.environ['DATA_CONSUMER_ID'],
+        consumer_secret=os.environ['DATA_CONSUMER_SECRET'],
     )
 
     trading_config = TradingServiceConfig(
@@ -42,9 +42,10 @@ if __name__ == "__main__":
     while True:
         time.sleep(60)
         logging.info("=================================")
-        logging.info(f"All pending orders : {ssis.pending_orders()}")
-        logging.info(f"All positions : {ssis.current_positions()}")
-        logging.info(f"Account balance : {ssis.account_balance()}")
-        logging.info(f"Portfolio : {ssis.view_portfolio()}")
-        logging.info(f"Current market ({list_symbols[0]}) : {ssis.get_current_market_from_stream(list_symbols[0])}")
-        logging.info(f"Current index ({list_indexes[0]}) : {ssis.get_current_index_from_stream(list_indexes[0])}")
+        logging.info(f"Tick data : {ssis.get_df_index_from_stream('VN30')}")
+        # logging.info(f"All pending orders : {ssis.pending_orders()}")
+        # logging.info(f"All positions : {ssis.current_positions()}")
+        # logging.info(f"Account balance : {ssis.account_balance()}")
+        # logging.info(f"Portfolio : {ssis.view_portfolio()}")
+        # logging.info(f"Current market ({list_symbols[0]}) : {ssis.get_current_market_from_stream(list_symbols[0])}")
+        # logging.info(f"Current index ({list_indexes[0]}) : {ssis.get_current_index_from_stream(list_indexes[0])}")
