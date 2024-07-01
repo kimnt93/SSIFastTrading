@@ -1,0 +1,3 @@
+# A Pythonic way to interact with SSI Trading API
+
+## COMING SOON....
