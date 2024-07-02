@@ -73,12 +73,12 @@ class FutureTradingService(BaseTradingService):
         :return:
         """
         try:
-            fc_rq = fcmodel_requests.StockAccountBalance(self._account_id)
+            fc_rq = fcmodel_requests.StockAccountBalance(self.account_id)
             res = self._client.get_stock_account_balance(fc_rq)
             data = res['data']
             if res['message'].lower() == 'success':
                 return AccountBalance(
-                    account_id=self._account_id,
+                    account_id=self.account_id,
                     market_id=self._market_id,
                     balance=data['accountBalance'],
                     trading_pl=data['totalPL'] - data['floatingPL'],
@@ -129,14 +129,14 @@ class FutureTradingService(BaseTradingService):
             end_date = (datetime.datetime.now() + datetime.timedelta(days=1)).strftime("%d/%m/%Y")
 
         try:
-            fc_rq = fcmodel_requests.OrderHistory(self._account_id, start_date, end_date)
+            fc_rq = fcmodel_requests.OrderHistory(self.account_id, start_date, end_date)
             res = self._client.get_order_history(fc_rq)
             if res['message'].lower() == 'success':
                 return [
                     CreatedOrder(
                         symbol=order['instrumentID'],
                         market_id=self._market_id,
-                        account_id=self._account_id,
+                        account_id=self.account_id,
                         order_side=order['buySell'],
                         order_type=order['orderType'],
                         order_price=order['price'],
@@ -175,13 +175,13 @@ class FutureTradingService(BaseTradingService):
         ],
         closePosition: [ ]
         """
-        fc_rq = fcmodel_requests.DerivativePosition(self._account_id, True)
+        fc_rq = fcmodel_requests.DerivativePosition(self.account_id, True)
         try:
             res = self._client.get_derivative_position(fc_rq)
             if res['message'].lower() == 'success':
                 return {position['instrumentID']:  StockPosition(
                     market_id=self._market_id,
-                    account_id=self._account_id,
+                    account_id=self.account_id,
                     symbol=position['instrumentID'],
                     position=position['longQty'] - position['shortQty'],
                     trading_pl=position['tradingPL'],
@@ -216,12 +216,12 @@ class FutureTradingService(BaseTradingService):
         ],
         closePosition: [ ]
         """
-        fc_rq = fcmodel_requests.DerivativePosition(self._account_id, True)
+        fc_rq = fcmodel_requests.DerivativePosition(self.account_id, True)
         try:
             res = self._client.get_derivative_position(fc_rq)
             if res['message'].lower() == 'success':
                 return {position['instrumentID']: StockPosition(
-                    market_id=self._market_id, account_id=self._account_id,
+                    market_id=self._market_id, account_id=self.account_id,
                     symbol=position['instrumentID'],
                     position=position['longQty'] - position['shortQty'],
                     trading_pl=position['tradingPL'],
@@ -248,7 +248,7 @@ class FutureTradingService(BaseTradingService):
         :param order_side:
         :return:
         """
-        fc_rq = fcmodel_requests.MaxBuyQty(self._account_id, symbol, price)
+        fc_rq = fcmodel_requests.MaxBuyQty(self.account_id, symbol, price)
         try:
             res = self._client.get_max_buy_qty(fc_rq)
             if res['message'].lower() == 'success':
@@ -257,7 +257,7 @@ class FutureTradingService(BaseTradingService):
                     symbol=symbol,
                     max_qty=data.get('maxBuyQty') or data.get('maxSellQty'),
                     power=data.get('purchasingPower'),
-                    market_id=self._market_id, account_id=self._account_id
+                    market_id=self._market_id, account_id=self.account_id
                 )
         except Exception as ex:
             logging.error(f"Error while getting max buy qty: {ex}")
@@ -296,7 +296,7 @@ class FutureTradingService(BaseTradingService):
         :return:
         """
         order.market_id = self._market_id
-        order.account_id = self._account_id
+        order.account_id = self.account_id
         try:
             fc_req = fcmodel_requests.NewOrder(
                 account=order.account_id,
@@ -343,7 +343,7 @@ class FutureTradingService(BaseTradingService):
         :return:
         """
         order.market_id = self._market_id
-        order.account_id = self._account_id
+        order.account_id = self.account_id
 
         fc_rq = fcmodel_requests.CancelOrder(
             account=order.account_id,
@@ -390,7 +390,7 @@ class FutureTradingService(BaseTradingService):
         order.order_price = order.order_price or new_price
         order.order_qty = order.order_qty or new_qty
         order.market_id = self._market_id
-        order.account_id = self._account_id
+        order.account_id = self.account_id
 
         fc_rq = fcmodel_requests.ModifyOrder(
             account=order.account_id,

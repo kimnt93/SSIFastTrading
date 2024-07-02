@@ -2,8 +2,11 @@ from typing import TypeVar, Generic, Dict, Union, List
 
 from pandas import DataFrame
 
-from ssi_trading.models.data import CurrentBar, CurrentIndex, CurrentMarket, CurrentForeignRoom, OHLCV, DailyIndex, \
-    StockPrice
+from ssi_trading.exceptions import TradingServiceUnavailable
+from ssi_trading.models.data import (
+    CurrentBar, CurrentIndex, CurrentMarket, CurrentForeignRoom,
+    OHLCV, DailyIndex, StockPrice
+)
 from ssi_trading.models.definitions import DataChannel
 from ssi_trading.models.trading import CreatedOrder, AccountBalance, StockPosition, MaxBuySellQty
 from ssi_trading.services.client import BaseTradingService, BaseDataService
@@ -22,8 +25,8 @@ class SSIServices(Generic[TDataStream, TTradingStream, TTradingService, TDataSer
         self._data_streams: Dict[str, TDataStream] = dict()
         self._data_service: Union[TDataService, None] = None
 
-        self._trading_stream: Union[TTradingStream, None] = None
-        self._trading_service: Union[TTradingService, None] = None
+        self._trading_streams: Dict[str, TTradingStream] = dict()
+        self._trading_services: Dict[str, TTradingService] = dict()
 
     # region setup stream, services
     #
@@ -32,18 +35,18 @@ class SSIServices(Generic[TDataStream, TTradingStream, TTradingService, TDataSer
         return self
 
     def add_trading_steam(self, stream: TTradingStream):
-        self._trading_stream = stream
+        self._trading_streams[stream.account_id] = stream
         return self
 
     def add_trading_service(self, service: TTradingService):
-        self._trading_service = service
+        self._trading_services[service.account_id] = service
         return self
 
     def add_data_service(self, service: TDataService):
         self._data_service = service
         return self
 
-    def start_stream(self):
+    def start(self):
         for stream in self._data_streams.values():
             stream.start_stream()
 
@@ -53,43 +56,69 @@ class SSIServices(Generic[TDataStream, TTradingStream, TTradingService, TDataSer
     # create, cancel, modify, account_balance, current_positions,
     # closed_positions, max_buy_sell_qty, order_history, etc.
     def create_order(self, order: CreatedOrder) -> Union[CreatedOrder, None]:
-        return self._trading_service.create_order(order)
+        if order.account_id not in self._trading_services:
+            raise TradingServiceUnavailable(f"Account ID {order.account_id} is not available.")
+        return self._trading_services[order.account_id].create_order(order)
 
     def cancel_order(self, order) -> Union[CreatedOrder, None]:
-        return self._trading_service.cancel_order(order)
+        if order.account_id not in self._trading_services:
+            raise TradingServiceUnavailable(f"Account ID {order.account_id} is not available.")
+        return self._trading_services[order.account_id].cancel_order(order)
 
     def modify_order(self, order: CreatedOrder, new_qty: int = 0, new_price: float = 0) -> CreatedOrder:
-        return self._trading_service.modify_order(order, new_qty, new_price)
+        if order.account_id not in self._trading_services:
+            raise TradingServiceUnavailable(f"Account ID {order.account_id} is not available.")
+        return self._trading_services[order.account_id].modify_order(order, new_qty, new_price)
 
-    def account_balance(self) -> Union[AccountBalance, None]:
-        return self._trading_service.account_balance()
+    def account_balance(self, account_id) -> Union[AccountBalance, None]:
+        if account_id not in self._trading_services:
+            raise TradingServiceUnavailable(f"Account ID {account_id} is not available.")
+        return self._trading_services[account_id].account_balance()
 
-    def current_position(self, symbol: str) -> Union[StockPosition, None]:
-        return self._trading_service.current_position(symbol)
+    def current_position(self, account_id, symbol: str) -> Union[StockPosition, None]:
+        if account_id not in self._trading_services:
+            raise TradingServiceUnavailable(f"Account ID {account_id} is not available.")
+        return self._trading_services[account_id].current_position(symbol)
 
-    def current_positions(self) -> Union[List[StockPosition], None]:
-        return self._trading_service.current_positions()
+    def current_positions(self, account_id) -> Union[List[StockPosition], None]:
+        if account_id not in self._trading_services:
+            raise TradingServiceUnavailable(f"Account ID {account_id} is not available.")
+        return self._trading_services[account_id].current_positions()
 
-    def closed_position(self, symbol: str) -> Union[StockPosition, None]:
-        return self._trading_service.closed_position(symbol)
+    def closed_position(self, account_id, symbol: str) -> Union[StockPosition, None]:
+        if account_id not in self._trading_services:
+            raise TradingServiceUnavailable(f"Account ID {account_id} is not available.")
+        return self._trading_services[account_id].closed_position(symbol)
 
-    def closed_positions(self) -> Union[List[StockPosition], None]:
-        return self._trading_service.closed_positions()
+    def closed_positions(self, account_id) -> Union[List[StockPosition], None]:
+        if account_id not in self._trading_services:
+            raise TradingServiceUnavailable(f"Account ID {account_id} is not available.")
+        return self._trading_services[account_id].closed_positions()
 
-    def max_buy_sell_qty(self, symbol, price, order_side) -> Union[MaxBuySellQty, None]:
-        return self._trading_service.max_buy_sell_qty(symbol, price, order_side)
+    def max_buy_sell_qty(self, account_id, symbol, price, order_side) -> Union[MaxBuySellQty, None]:
+        if account_id not in self._trading_services:
+            raise TradingServiceUnavailable(f"Account ID {account_id} is not available.")
+        return self._trading_services[account_id].max_buy_sell_qty(symbol, price, order_side)
 
-    def order_history(self) -> Union[List[CreatedOrder], None]:
-        return self._trading_service.order_history(order_status=None, start_date=None, end_date=None, page=1, page_size=50)
+    def order_history(self, account_id) -> Union[List[CreatedOrder], None]:
+        if account_id not in self._trading_services:
+            raise TradingServiceUnavailable(f"Account ID {account_id} is not available.")
+        return self._trading_services[account_id].order_history(order_status=None, start_date=None, end_date=None, page=1, page_size=50)
 
-    def pending_orders(self) -> Union[List[CreatedOrder], None]:
-        return self._trading_service.pending_orders()
+    def pending_orders(self, account_id) -> Union[List[CreatedOrder], None]:
+        if account_id not in self._trading_services:
+            raise TradingServiceUnavailable(f"Account ID {account_id} is not available.")
+        return self._trading_services[account_id].pending_orders()
 
-    def filled_orders(self) -> Union[List[CreatedOrder], None]:
-        return self._trading_service.filled_orders()
+    def filled_orders(self, account_id) -> Union[List[CreatedOrder], None]:
+        if account_id not in self._trading_services:
+            raise TradingServiceUnavailable(f"Account ID {account_id} is not available.")
+        return self._trading_services[account_id].filled_orders()
 
-    def view_portfolio(self) -> Union[List[StockPosition], None]:
-        return self._trading_service.view_portfolio()
+    def view_portfolio(self, account_id) -> Union[List[StockPosition], None]:
+        if account_id not in self._trading_services:
+            raise TradingServiceUnavailable(f"Account ID {account_id} is not available.")
+        return self._trading_services[account_id].view_portfolio()
 
     # endregion
 

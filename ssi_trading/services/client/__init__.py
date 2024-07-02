@@ -119,7 +119,7 @@ class BaseDataService(ABC):
 class BaseTradingService(ABC):
     def __init__(self, config: TradingServiceConfig):
         self._config: TradingServiceConfig = config
-        self._account_id: str = self._config.account_id.__str__().upper()
+        self.account_id: str = self._config.account_id.__str__().upper()
         self._device_id: str = FCTradingClient.get_deviceid()
         self._user_agent: str = FCTradingClient.get_user_agent()
         self._account_token = self._config.auth_token

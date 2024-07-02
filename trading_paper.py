@@ -5,10 +5,12 @@ from dotenv import load_dotenv
 
 from ssi_trading.config import TradingServiceConfig, DataServiceConfig
 from ssi_trading.server import SSIServices
+from ssi_trading.services.client.data import MarketDataService
 from ssi_trading.services.paper.futures import PaperFutureTradingService
 from ssi_trading.services.stream.index import IndexDataStream
 from ssi_trading.services.stream.market import MarketDataStream
 import os
+
 
 load_dotenv()
 
@@ -23,8 +25,8 @@ if __name__ == "__main__":
     )
 
     trading_config = TradingServiceConfig(
-        consumer_id="",
-        consumer_secret="",
+        consumer_id=os.environ['TRADING_CONSUMER_ID'],
+        consumer_secret=os.environ['TRADING_CONSUMER_SECRET'],
         account_id=os.environ['ACCOUNT_ID'],
         paper_trading=True,
     )
@@ -35,9 +37,11 @@ if __name__ == "__main__":
         stream=MarketDataStream(data_config, list_symbols=list_symbols)
     ).add_data_stream(
         stream=IndexDataStream(data_config, list_indexes=list_indexes)
+    ).add_data_service(
+        service=MarketDataService(data_config)
     )
 
-    ssis.start_stream()
+    ssis.start()
 
     while True:
         time.sleep(60)

@@ -34,7 +34,7 @@ class PaperFutureTradingService(BaseTradingService):
 
     def create_order(self, order: CreatedOrder) -> Union[CreatedOrder, None]:
         order.market_id = self._market_id
-        order.account_id = self._account_id
+        order.account_id = self.account_id
         params = {
             "instrumentID": order.symbol,
             "account": order.account_id,
@@ -65,7 +65,7 @@ class PaperFutureTradingService(BaseTradingService):
 
     def cancel_order(self, order) -> Union[CreatedOrder, None]:
         order.market_id = self._market_id
-        order.account_id = self._account_id
+        order.account_id = self.account_id
 
         payload = {
             "orderID": order.order_id,
@@ -87,7 +87,7 @@ class PaperFutureTradingService(BaseTradingService):
         order.order_price = order.order_price or new_price
         order.order_qty = order.order_qty or new_qty
         order.market_id = self._market_id
-        order.account_id = self._account_id
+        order.account_id = self.account_id
 
         payload = {
             "orderID": order.order_id,
@@ -111,13 +111,13 @@ class PaperFutureTradingService(BaseTradingService):
             return None
 
     def account_balance(self) -> Union[AccountBalance, None]:
-        params = {"account": self._account_id}
+        params = {"account": self.account_id}
         response = self._client.get(self.account_balance_url, headers=self._request_headers, params=params)
         response.raise_for_status()
         try:
             data = response.json()['data']
             return AccountBalance(
-                account_id=self._account_id,
+                account_id=self.account_id,
                 market_id=self._market_id,
                 balance=data['accountBalance'],
                 trading_pl=data['totalPL'] - data['floatingPL'],
@@ -134,13 +134,13 @@ class PaperFutureTradingService(BaseTradingService):
             return None
 
     def current_positions(self) -> Union[Dict[str, StockPosition], None]:
-        response = self._client.get(self.position_url, headers=self._request_headers, params={"account": self._account_id})
+        response = self._client.get(self.position_url, headers=self._request_headers, params={"account": self.account_id})
         response.raise_for_status()
         try:
             data = response.json()
             return {
                 row['instrumentID']: StockPosition(
-                    account_id=self._account_id,
+                    account_id=self.account_id,
                     market_id=self._market_id,
                     symbol=row['instrumentID'],
                     position=row['longQty'] - row['shortQty'],
@@ -155,13 +155,13 @@ class PaperFutureTradingService(BaseTradingService):
             return None
 
     def closed_positions(self) -> Union[Dict[str, StockPosition], None]:
-        response = self._client.get(self.position_url, headers=self._request_headers, params={"account": self._account_id})
+        response = self._client.get(self.position_url, headers=self._request_headers, params={"account": self.account_id})
         response.raise_for_status()
         try:
             data = response.json()
             return {
                 row['instrumentID']: StockPosition(
-                    account_id=self._account_id,
+                    account_id=self.account_id,
                     market_id=self._market_id,
                     symbol=row['instrumentID'],
                     position=row['longQty'] - row['shortQty'],
@@ -179,7 +179,7 @@ class PaperFutureTradingService(BaseTradingService):
     def max_buy_sell_qty(self, symbol, price, order_side) -> Union[MaxBuySellQty, None]:
         params = {
             "stockSymbol": symbol,
-            "account": self._account_id,
+            "account": self.account_id,
             "price": price,
             "type": order_side
         }
@@ -188,7 +188,7 @@ class PaperFutureTradingService(BaseTradingService):
         try:
             data = response.json()
             return MaxBuySellQty(
-                account_id=self._account_id,
+                account_id=self.account_id,
                 market_id=self._market_id,
                 symbol=symbol,
                 max_qty=data['data'].get('maxBuyQty') or data['data'].get('maxSellQty') or 0,
@@ -203,7 +203,7 @@ class PaperFutureTradingService(BaseTradingService):
             start_date = datetime.datetime.now().strftime("%d/%m/%Y")
             end_date = (datetime.datetime.now() + datetime.timedelta(days=1)).strftime("%d/%m/%Y")
         params = {
-            "account": self._account_id,
+            "account": self.account_id,
             "page": page,
             "pageSize": page_size,
             "orderStatus": order_status,
@@ -217,7 +217,7 @@ class PaperFutureTradingService(BaseTradingService):
             data = response.json()
             return [
                 CreatedOrder(
-                    account_id=self._account_id,
+                    account_id=self.account_id,
                     market_id=row['marketID'],
                     symbol=row['instrumentID'],
                     order_side=row['buySell'],
