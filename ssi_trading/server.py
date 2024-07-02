@@ -1,3 +1,4 @@
+import logging
 from typing import TypeVar, Generic, Dict, Union, List
 
 from pandas import DataFrame
@@ -46,10 +47,17 @@ class SSIServices(Generic[TDataStream, TTradingStream, TTradingService, TDataSer
         self._data_service = service
         return self
 
-    def start(self):
+    def start_data_stream(self):
         for stream in self._data_streams.values():
+            logging.debug(f"Start data stream: {stream}")
             stream.start_stream()
+        return self
 
+    def start_trading_stream(self):
+        for stream in self._trading_streams.values():
+            logging.debug(f"Start trading stream: {stream}")
+            stream.start_stream()
+        return self
     # endregion
 
     # region trading services

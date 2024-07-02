@@ -8,14 +8,14 @@ from ssi_trading.services.stream import BaseDataStream
 
 
 class BarDataStream(BaseDataStream[CurrentBar]):
-    def __init__(self, config, list_symbols):
+    def __init__(self, config):
         # the bar stream will receive OHLCV, example:
         """
         {‘Datatype’: 'B',
         ‘Content’: '{"RType":"B","Symbol":"X26","TradingTime":"14:28:33",
         "Open":16000,"High":16000,"Low":16000,"Close":16000,"Volume":5000,"Value":0}'}
         """
-        super().__init__(config, list_symbols, DataChannel.BAR_DATA)
+        super().__init__(config, config.symbols, DataChannel.BAR_DATA)
 
     def create_instance(self) -> CurrentBar:
         return CurrentBar()

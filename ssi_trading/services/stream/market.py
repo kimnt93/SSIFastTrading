@@ -8,7 +8,7 @@ from ssi_trading.services.stream import BaseDataStream
 
 
 class MarketDataStream(BaseDataStream[CurrentMarket]):
-    def __init__(self, config, list_symbols):
+    def __init__(self, config):
         # the price stream will receive tick data of each symbol, example:
         """
         {'DataType': 'X',
@@ -22,7 +22,7 @@ class MarketDataStream(BaseDataStream[CurrentMarket]):
         "MarketId":"DERIVATIVES","Exchange":"DERIVATIVES","TradingSession":"LO","TradingStatus":"Active",
         "Change":-6.099999999999909,"RatioChange":-0.47,"EstMatchedPrice":1283.9,"Side":null,"CloseQtty":0.0}'}
         """
-        super().__init__(config, list_symbols, DataChannel.MARKET_DATA)
+        super().__init__(config, config.symbols, DataChannel.MARKET_DATA)
 
     def create_instance(self) -> CurrentMarket:
         return CurrentMarket()

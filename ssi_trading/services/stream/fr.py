@@ -8,7 +8,7 @@ from ssi_trading.services.stream import BaseDataStream
 
 
 class ForeignRoomDataStream(BaseDataStream[CurrentForeignRoom]):
-    def __init__(self, config, list_symbols):
+    def __init__(self, config):
         # the bar stream will receive OHLCV, example:
         """
         { datatype: 'R',
@@ -17,7 +17,7 @@ class ForeignRoomDataStream(BaseDataStream[CurrentForeignRoom]):
         0,"CurrentRoom":1475400.0,"BuyVol":0.0,"SellVol":0.0,"BuyVal":0.0,"SellVal":0.0,"MarketId":"UPCOM","E
         xchange":"UPCOM"}' }
         """
-        super().__init__(config, list_symbols, DataChannel.FR_ROOM_DATA)
+        super().__init__(config, config.symbols, DataChannel.FR_ROOM_DATA)
 
     def create_instance(self) -> CurrentForeignRoom:
         return CurrentForeignRoom()

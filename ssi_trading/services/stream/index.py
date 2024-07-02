@@ -8,7 +8,7 @@ from ssi_trading.services.stream import BaseDataStream
 
 
 class IndexDataStream(BaseDataStream[CurrentIndex]):
-    def __init__(self, config, list_indexes):
+    def __init__(self, config):
         # the index stream will receive tick data of each market, example:
         """
         {'DataType': 'MI',
@@ -18,7 +18,7 @@ class IndexDataStream(BaseDataStream[CurrentIndex]):
         "TotalQttyPt":702391.0,"TotalValuePt":21646000000.0,"Exchange":"HOSE","AllQty":34541991.0,"AllValue":1125483000000.0,
         "IndexType":"","TradingSession":"LO","MarketId":null,"RType":"MI","TotalQttyOd":0.0,"TotalValueOd":0.0}'}
         """
-        super().__init__(config, list_indexes, DataChannel.INDEX_DATA)
+        super().__init__(config, config.symbols, DataChannel.INDEX_DATA)
 
     def create_instance(self) -> CurrentIndex:
         return CurrentIndex()

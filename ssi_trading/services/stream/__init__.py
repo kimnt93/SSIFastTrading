@@ -38,9 +38,12 @@ T = TypeVar("T")
 
 
 class BaseTradingStream(Generic[T]):
-    def __init__(self, config: TradingServiceConfig, account_id: str):
-        self.account_id = account_id
+    def __init__(self, config: TradingServiceConfig):
+        logging.debug(f"Init trading with config: {config}")
+
         self._config = config
+        self.account_id = self._config.account_id
+        self.account_type = self._config.account_type
         self._client = FCTradingClient(
             self._config.Url, self._config.ConsumerID,
             self._config.ConsumerSecret, self._config.PrivateKey,
@@ -56,19 +59,22 @@ class BaseTradingStream(Generic[T]):
         sys.exit(1)
 
     def start_stream(self):
-        if self._streamer is None:
-            # stream channel
-            self._streamer = FCTradingStream(
-                fctrading_client=self._client,
-                stream_url=self._config.StreamURL,
-                last_notify_id=self._config.NotifyId.__str__(),
-                on_message=self.on_message,
-                on_error=self.on_error
-            )
-            logging.info(f"Start stream : {self._config.StreamURL}")
-            self._streamer.start()
+        if self._config.paper_trading:
+            logging.warning("Paper trading is not supported for trading stream.")
         else:
-            logging.warning("Data stream is already started.")
+            if self._streamer is None:
+                # stream channel
+                self._streamer = FCTradingStream(
+                    fctrading_client=self._client,
+                    stream_url=self._config.StreamURL,
+                    last_notify_id=self._config.NotifyId.__str__(),
+                    on_message=self.on_message,
+                    on_error=self.on_error
+                )
+                logging.info(f"Start stream : {self._config.StreamURL}")
+                self._streamer.start()
+            else:
+                logging.warning("Data stream is already started.")
 
 
 class BaseDataStream(Generic[T]):
@@ -78,6 +84,7 @@ class BaseDataStream(Generic[T]):
         :param names: VN30, VN30F2407, HPG, etc.
         :param channel_name: X, F, MI, etc.
         """
+        logging.debug(f"Init datastream with config: {config}")
         self._config = config
         self._names = names
         self._names = names if isinstance(names, list) else [names]
