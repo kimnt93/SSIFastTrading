@@ -11,29 +11,6 @@ from ssi_fctrading import FCTradingClient, FCTradingStream
 from ssi_trading.config import TradingServiceConfig, DataServiceConfig
 from ssi_trading.factory import create_market_data_client
 
-data_logger = logging.getLogger("data")
-data_logger.setLevel(logging.DEBUG)
-
-# Create a file handler that logs only DEBUG level messages
-file_handler = logging.FileHandler('data.log')
-file_handler.setLevel(logging.DEBUG)
-
-# Create a formatter and set it for the file handler
-formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-file_handler.setFormatter(formatter)
-
-# Add the file handler to the trading logger
-data_logger.addHandler(file_handler)
-
-
-# Add a filter to skip other log levels if necessary (optional)
-class DebugFilter(logging.Filter):
-    def filter(self, record):
-        return record.levelno == logging.DEBUG
-
-
-file_handler.addFilter(DebugFilter())
-
 
 T = TypeVar("T")
 
@@ -122,7 +99,7 @@ class BaseDataStream(Generic[T]):
         raise NotImplementedError("Method create_instance is not implemented yet.")
 
     def on_message(self, message):
-        data_logger.debug(f"Recv message: {message}")
+        logging.debug(f"Recv message: {message}")
         message = json.loads(message) if isinstance(message, str) else message
         self._message_content = json.loads(message["Content"]) if isinstance(message["Content"], str) else message["Content"]
         self._message_type = message['DataType']
