@@ -1,21 +1,22 @@
 from abc import ABC, abstractmethod
 from typing import Union, List, Dict
 
+from ssi_fc_data.fc_md_client import MarketDataClient
 from ssi_fctrading import FCTradingClient
 from ssi_trading.config import TradingServiceConfig, DataServiceConfig
+from ssi_trading.factory import create_market_data_client
 from ssi_trading.models.data import StockPrice, DailyIndex, OHLCV
 from ssi_trading.models.definitions import OrderStatus, SecurityMarket
 from ssi_trading.models.trading import (
     CreatedOrder, AccountBalance, StockPosition, MaxBuySellQty,
 )
 import requests
-from ssi_fc_data import fc_md_client
 
 
 class BaseDataService(ABC):
     def __init__(self, config: DataServiceConfig):
         self._config: DataServiceConfig = config
-        self._client = fc_md_client.MarketDataClient(self._config)
+        self._client: MarketDataClient = create_market_data_client(self._config)
 
     @abstractmethod
     def stock_price(

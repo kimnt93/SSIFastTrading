@@ -9,6 +9,7 @@ from ssi_fc_data.fc_md_stream import MarketDataStream
 from ssi_fctrading import FCTradingClient, FCTradingStream
 
 from ssi_trading.config import TradingServiceConfig, DataServiceConfig
+from ssi_trading.factory import create_market_data_client
 
 data_logger = logging.getLogger("data")
 data_logger.setLevel(logging.DEBUG)
@@ -44,11 +45,14 @@ class BaseTradingStream(Generic[T]):
         self._config = config
         self.account_id = self._config.account_id
         self.account_type = self._config.account_type
-        self._client = FCTradingClient(
-            self._config.Url, self._config.ConsumerID,
-            self._config.ConsumerSecret, self._config.PrivateKey,
-            self._config.TwoFAType
-        )
+        if not self._config.paper_trading:
+            self._client = FCTradingClient(
+                self._config.Url, self._config.ConsumerID,
+                self._config.ConsumerSecret, self._config.PrivateKey,
+                self._config.TwoFAType
+            )
+        else:
+            logging.debug("Paper trading is not supported for trading stream.")
         self._streamer: Union[FCTradingStream, None] = None
 
     def on_message(self, message):
@@ -106,6 +110,8 @@ class BaseDataStream(Generic[T]):
         self._message_type = None
         self._message_content = None
 
+        self._client: MarketDataClient = create_market_data_client(self._config)
+
     def get_dataframe(self, symbol) -> DataFrame:
         return self._df.get(symbol, DataFrame())
 
@@ -131,7 +137,7 @@ class BaseDataStream(Generic[T]):
         else:
             if self._streamer is None:
                 # stream channel
-                self._streamer = MarketDataStream(self._config, MarketDataClient(self._config))
+                self._streamer = MarketDataStream(self._config, self._client)
                 channel = f"{self.channel_name}:{'-'.join(self._names)}"
                 logging.info(f"Start stream with channel: {channel}")
                 self._streamer.start(self.on_message, self.on_error, channel)

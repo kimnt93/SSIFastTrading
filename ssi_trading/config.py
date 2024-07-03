@@ -15,8 +15,24 @@ PAPER_REQUEST_HEADERS = {
 }
 
 
-class DataServiceConfig:
+class _BaseConfig:
+    def __init__(self, consumer_id, consumer_secret, secret_key=""):
+        self.consumer_id = consumer_id
+        self.consumer_secret = consumer_secret
+        self.secret_key = secret_key
+
+    def __hash__(self):
+        return hash((self.consumer_id, self.consumer_secret, self.secret_key))
+
+    def __eq__(self, other):
+        if isinstance(other, DataServiceConfig):
+            return self.__hash__() == other.__hash__()
+        return False
+
+
+class DataServiceConfig(_BaseConfig):
     def __init__(self, consumer_id: str, consumer_secret: str, symbols):
+        super().__init__(consumer_id, consumer_secret)
         self.consumerID = consumer_id
         self.consumerSecret = consumer_secret
         self.auth_type = 'Bearer'
@@ -29,7 +45,7 @@ class DataServiceConfig:
                 f"consumer_secret={self.consumerSecret[:4]}..., symbols={self.symbols})")
 
 
-class TradingServiceConfig:
+class TradingServiceConfig(_BaseConfig):
     def __init__(
             self,
             consumer_id: str,
@@ -42,6 +58,7 @@ class TradingServiceConfig:
             two_fa_type: int = 0,  # 0-PIN, 1-OTP
             notify_id: int = -1,
     ):
+        super().__init__(consumer_id, consumer_secret, private_key)
         self.auth_token = auth_token
         self.paper_trading = paper_trading
         self.ConsumerID = consumer_id
